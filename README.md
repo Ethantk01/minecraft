@@ -1,6 +1,8 @@
 # Voxel Frontier
 
-Version 0.14.3.
+Version 0.14.4.
+
+Chunk generation reuses noise samples. Mesh builds reuse unchanged lighting and use direct neighboring voxel reads; chunk streaming updates its search when the player changes chunks. Mob pathfinding uses a stable priority queue, sunlight checks cache column heights, and unchanged HUD/inventory contents stay in place. XP orbs share an instanced draw call. Multiplayer batches changed cells and fluid levels, and replays missed edits when a guest reconnects.
 
 Drop and XP effects are drawn offscreen before play begins, avoiding first-use graphics stalls. XP meshes reuse their geometry and material. Block edits use a priority section rebuild with cached lighting; slower relighting follows in the background. Chunk borders and vertical section boundaries update together.
 
