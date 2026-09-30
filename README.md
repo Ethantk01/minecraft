@@ -1,6 +1,6 @@
 # Voxel Frontier
 
-Version 0.14.2.
+Version 0.14.3.
 
 Drop and XP effects are drawn offscreen before play begins, avoiding first-use graphics stalls. XP meshes reuse their geometry and material. Block edits use a priority section rebuild with cached lighting; slower relighting follows in the background. Chunk borders and vertical section boundaries update together.
 
@@ -99,3 +99,5 @@ This is a compact Minecraft-inspired game. The dragon, villages, mob behavior, r
 Floor edits rebuild affected sections immediately; changed lighting is updated in bounded steps. Autosaves use asynchronous browser storage during play. Flowers retain the same daisy texture in their detailed and distant models.
 
 Multiplayer includes the approved Metered client TURN credential for cross-network relay (UDP, TCP, and TLS). The account currently has a free trial allowance; connections requiring relay stop when its quota is exhausted. These client credentials are intentionally public in the uploaded browser build; no account administration API key is included.
+
+Version 0.14.3 fixes the relay configuration being omitted from PeerJS options, accepts capitalized room codes, reconnects signaling after interruptions, and loads versioned scripts to avoid stale mobile caches. Relay tests assert actual selected local and remote TURN candidates. Refresh both devices and create a new host room after updating.
