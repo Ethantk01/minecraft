@@ -1,6 +1,8 @@
 # Voxel Frontier
 
-Version 0.14.4.
+Version 0.14.5.
+
+Loading screens cover terrain and asset preparation, New World creation, and multiplayer connection/world transfer. Dropped-item hit tests now include the camera, fixing the rendering exception that froze the view until the item was collected. Mobs, items, XP, projectiles, vehicles and falling blocks are parked per dimension during travel; mobs/items/XP/vehicles/falling blocks also persist in saves. Portal previews show destination entities and multiplayer avatars. Inactive dimensions pause their entity simulation. Touch Play/Join requests browser fullscreen; browsers without page fullscreen support can use a home-screen launch.
 
 Chunk generation reuses noise samples. Mesh builds reuse unchanged lighting and use direct neighboring voxel reads; chunk streaming updates its search when the player changes chunks. Mob pathfinding uses a stable priority queue, sunlight checks cache column heights, and unchanged HUD/inventory contents stay in place. XP orbs share an instanced draw call. Multiplayer batches changed cells and fluid levels, and replays missed edits when a guest reconnects.
 
@@ -61,7 +63,7 @@ Open `index.html` in a recent desktop browser. The game works offline from the f
 - WASD: move; mouse: look; Shift: sprint.
 - Space: jump, swim upward, or climb a ladder. Release Space to sink in water. Move toward a shore while holding Space to climb out. X descends in water, on ladders, or in creative flight.
 - Left click: hold to mine, or click to attack. Right click: place, eat, ignite a portal or fire, use a furnace, open a chest, trade with a villager, or use a crafting table. Hold right click with a shield selected or equipped in the offhand to block damage.
-- 1-9 or mouse wheel: hotbar. I: inventory and 2x2 crafting. C: 3x3 crafting when near a crafting table. E or Esc: menu.
+- 1-9 or mouse wheel: hotbar. E or I: inventory and 2x2 crafting. C: 3x3 crafting when near a crafting table. Esc: menu.
 - Creative mode: F toggles flight; Space rises and X descends.
 - Spectator mode: choose it in the pause menu. Fly with WASD, rise with Space, descend with Ctrl, and hold Shift to move faster. Pass through blocks and mobs without interacting, taking damage, collecting items, or attracting monsters. Switch back in the menu; the game moves you above ground if you switch while inside a block.
 - Place a minecart on rails with right click, then right click the cart to board. W pushes off from rest, S brakes, and Shift dismounts. Boats also use right click to board and Shift to dismount. Powered rails accelerate moving carts when switched on by a lever or wire; unpowered powered rails brake them.
