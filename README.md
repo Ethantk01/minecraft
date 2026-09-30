@@ -1,10 +1,101 @@
-# Voxel Frontier 0.14.0
+# Voxel Frontier
 
-Play at https://ethantk01.github.io/minecraft/ once the Pages deployment completes.
+Version 0.14.2.
 
-- Desktop: WASD, mouse look, left click mine/hit, right click use/place, E inventory, Esc pause.
-- Mobile: left movement pad, drag the world view to look, labeled action buttons, touch inventory dragging and long-press splitting.
-- Multiplayer: Host world in the pause menu, share the room code, and Join on another device. Up to four players. Keep the host's browser open. Guests keep their single-player saves.
-- Players have textured 3D models, collision, punching, damage and knockback.
+Drop and XP effects are drawn offscreen before play begins, avoiding first-use graphics stalls. XP meshes reuse their geometry and material. Block edits use a priority section rebuild with cached lighting; slower relighting follows in the background. Chunk borders and vertical section boundaries update together.
 
-The tested portable build is in `Voxel Frontier.zip`. GitHub Actions extracts and publishes it. Mobs and world simulation run around the host in the host's current dimension. Some restrictive networks require a TURN relay for WebRTC connections.
+## Peer-to-peer multiplayer
+
+In the pause menu, enter a name and click **Host world**. Send the room code to friends; they enter it and click **Join**. The host must keep the game open. Up to four players can build together. Joining uses a separate session world and does not overwrite the guest's single-player save. **Leave** returns to that save.
+
+WebRTC carries world edits, avatars, containers, weather/time, mobs and item pickup. The included PeerJS library uses its public signaling service to establish the connection. Some restrictive networks cannot connect without a TURN relay; an error is shown if connection setup fails. Textured 3D players have animated limbs, collision, melee damage and knockback. Mobs/world simulations run around the host in the host's current dimension. Guests can explore other dimensions, but active mobs there require the host to travel there too. Keep backups before hosting an important world.
+
+
+End entry places the player ten blocks above the central island surface. The End exit returns to the Overworld surface at X=0, Z=0. The End exit keeps its textured surface, while entry portal previews clip accurately when the camera jumps across the near plane.
+
+Lighting and chunk remeshing now yield across frames after block changes. Rain and snow fall as 3D streaks in the world instead of a screen overlay. Press `/` while playing for a command bar. Supported single-player commands include `/help`, `/seed`, `/gamemode`, `/time`, `/weather`, `/tp`, `/give`, `/clear`, `/setblock`, `/fill`, `/summon`, `/kill`, `/gamerule`, and `/say`. Use `/help` in game for the current list. Worlds save in each browser separately, including when played from a shared URL.
+
+The pause menu now has a saved render distance slider from two to eight chunks. Camera range, fog, and chunk streaming follow the selected distance. Dragon melee and arrow hits use the visible model parts instead of a distant center point, and player collision uses its torso shape. The leg joint rotations now account for the renderer's upward Y axis, keeping the feet connected and folded beneath the body.
+
+## Play this build
+
+Open `index.html` in Microsoft Edge or Chrome and click **Enter World**. Choose Survival for progression, Creative for building, or Spectator for exploration. The menu's **First steps & saving** section explains the starting loop. On desktop, **E** opens inventory and **Esc** opens the pause menu. On mobile, use the left movement pad, drag the world view to look, and use the labeled action buttons. Touch-drag inventory stacks; long-press a slot to split. Use **Download World Backup** to keep a portable copy; **Restore Backup** loads it later. New World replaces the current browser save, so back up first.
+
+The optional **Experiments** toggle enables direct portal crossing and destination views. Each portal renders into a cropped view of its projected opening, so the destination image stays aligned as the camera moves. The preview uses the destination's lighting, fog distances, and color conversion. Portal crossings keep the source world ready for the return view, update the sky and camera in the same frame, and rearm as soon as the player clears the portal plane. The water exit assist raises the player through normal movement.
+
+Portal windows now reuse their render targets during a crossing to avoid a blank allocation frame. A generated Nether portal is placed on a searched solid, lava-free site, and unsafe saved Nether arrival positions return to that safe portal. The Nether spans 128 blocks vertically. At most three ghasts can live at once, with rarer spawn attempts; punching an incoming fireball sends it along the player's view, and a returned hit can kill a ghast. The build includes 87 sounds extracted from the locally installed Minecraft assets, covering block materials, steps, mobs, combat, fluids, portals, containers, mechanisms, and the Otherside music disc. Instant portal crossings use a shortened cue.
+
+Skeletons carry bows and fire modeled arrows. Dragon wing tips follow their parent wings during flight. Duplicate wooden pickaxe and sword recipes were removed. The test world has separate supply chests and additional redstone, snow, and workstation fixtures; enter `testworld` in the New World seed field to create it.
+
+The dragon model uses five neck and twelve tail sections. Its pose equations for the neck, head, body, tail, wings, jaw, and legs are ported from the installed Minecraft 1.21.10 client and driven by a 20 Hz flight history. The End fight now includes circling, strafing fireballs, a landing approach, perching, a roar, lingering dragon breath, a charge, and takeoff. Ten destructible End crystals on bedrock capped obsidian pillars heal the dragon until destroyed. Ranged hits bounce off the perched dragon, and a boss health bar shows encounter progress. Flight paths and arena dimensions remain adapted to Voxel Frontier's world scale.
+
+The central End island is larger, and its bedrock exit podium exists from the start of the fight. The portal surface appears only after the dragon dies. The dragon's wings and three-part legs follow the body pivot, matching the installed model hierarchy.
+
+Eyes of Ender can now be inserted into any End portal frame. Filling all twelve frames in a 5×5 ring activates the portal, including rings built by the player. Creative mode can remove misplaced frames; replacing one clears its old eye state. Existing stronghold eye states remain compatible.
+
+Block hardness, blast resistance, required tools, and mining levels now use per-block data from Minecraft 1.21.9 rather than broad material approximations. Mining uses the game's 30/100 tick divisor, tool efficiency, and water/airborne penalties; TNT checks blast resistance. Tool durability, speed, mining tier, damage bonus, repair material, and enchantability follow the supplied tables. The catalog also includes the missing tool and armor tiers. Equipped armor now uses defense, toughness, knockback resistance, and per-hit durability loss.
+
+Container and workstation screens use the GUI textures from the installed Minecraft 1.21.10 client. Slot controls align with those textures. Furnace and brewing contents persist, smelting consumes fuel, and output slots protect their results. Workstation simulations run at ten updates per second instead of scanning every frame.
+
+The core survival, crafting, storage, physics, rail test range, and texture catalog are covered by browser regression checks. Advanced systems remain adaptations: this is a playable browser sandbox, not complete Minecraft parity. Merchant offers, enchantment choices, smithing upgrades, and stonecutting recipes are limited to the game's supported catalog.
+
+
+Redstone now includes working droppers, dispensers, hoppers, daylight detectors, targets, trapped chests, note blocks, weighted and wooden pressure plates, copper bulbs, tripwire, sculk sensors, crafters, trapdoors, lightning rods, lecterns, and chiseled bookshelves, and activator rails. Pistons use the uploaded 3D model pack's face UVs for the base and head, including the inner cavity and arm.
+
+Pistons now face the player when placed, extend horizontally or vertically, push up to twelve movable blocks, displace entities, and break fragile components in their path. Sticky pistons pull one movable block when power ends. Redstone torches mount on top or on a wall, invert power from their support block after a short delay, emit light when lit, and burn out after rapid toggling.
+
+Redstone dust now draws connected lines through straight runs and corners, climbs one-block steps, and updates its shape when nearby blocks change. Its signal follows the connected wire and drops by one level per dust block.
+
+The witch hat layers now rotate around their own pivots and sit together on the head. Chest latches are centered, and the chest inventory icon is rendered from the textured chest model.
+
+Redstone blocks provide constant power. Redstone torches invert power from their supporting block. Buttons and pressure plates give temporary signals; detector rails respond to minecarts. Repeaters add adjustable delay, comparators compare or subtract signals, and observers pulse when the block in front changes. Pistons extend through up to twelve movable blocks; sticky pistons pull one block back. Powered rails now use both powered textures from the supplied 3D Default pack. The switched lever uses the pack's separate on model.
+
+Minecarts can be pushed into motion on rails or across the ground and break after two quick punches, dropping a minecart in Survival. Powered rails switch to their lit texture when energized. Levers tilt when switched. Rails that connect to a higher neighbor now use a rising 3D track and matching hover outline.
+
+Open `index.html` in a recent desktop browser. The game works offline from the folder. It saves worlds in that browser's local storage.
+
+## Controls
+
+- WASD: move; mouse: look; Shift: sprint.
+- Space: jump, swim upward, or climb a ladder. Release Space to sink in water. Move toward a shore while holding Space to climb out. X descends in water, on ladders, or in creative flight.
+- Left click: hold to mine, or click to attack. Right click: place, eat, ignite a portal or fire, use a furnace, open a chest, trade with a villager, or use a crafting table. Hold right click with a shield selected or equipped in the offhand to block damage.
+- 1-9 or mouse wheel: hotbar. I: inventory and 2x2 crafting. C: 3x3 crafting when near a crafting table. E or Esc: menu.
+- Creative mode: F toggles flight; Space rises and X descends.
+- Spectator mode: choose it in the pause menu. Fly with WASD, rise with Space, descend with Ctrl, and hold Shift to move faster. Pass through blocks and mobs without interacting, taking damage, collecting items, or attracting monsters. Switch back in the menu; the game moves you above ground if you switch while inside a block.
+- Place a minecart on rails with right click, then right click the cart to board. W pushes off from rest, S brakes, and Shift dismounts. Boats also use right click to board and Shift to dismount. Powered rails accelerate moving carts when switched on by a lever or wire; unpowered powered rails brake them.
+- Right click a button or lever to power a circuit. Right click a repeater to cycle its delay or a comparator to switch between compare and subtract modes.
+- Place snow layers by right clicking snow while holding a snow layer item. Up to eight layers can stack. Mine layers with a shovel to collect snowballs; right click to throw a snowball.
+
+## World and progression
+
+The world extends from Y=-64 to Y=319 and has terrain biomes, cave networks, sparse ore veins, trees, villages, chests, a stronghold, the Nether, and the End. Overworld terrain now uses moderate hills rather than massive mountains, while still blending across biome edges. Chunk loading reuses cached climate and height samples and processes one new chunk per frame to keep controls responsive. Chunks use three distance-based detail levels: full geometry nearby, fewer shared leaf faces at medium distance, and fewer small decorative meshes in the outer ring. Detail changes have distance hysteresis and are rebuilt one chunk at a time. Mobs switch to simpler textured models when distant while retaining their normal physics and behavior. Craft better pickaxes to mine higher tier ores. A 4x5 obsidian frame ignited with flint and steel opens a Nether portal. An Eye of Ender reports the stronghold's coordinates and bearing. Insert Eyes of Ender into all twelve stronghold portal frames to activate the End portal. Defeating the dragon opens a bedrock-framed return portal.
+
+The inventory has 36 empty slots when starting a new world. Its layout follows the player inventory screen, with four armor slots, an offhand slot, a player preview, a 2×2 crafting grid, 27 storage slots, and nine hotbar slots. Drag stacks between inventory, equipment, hotbar, chest, and crafting slots. Right click a stack to split it. The green recipe button lists recipes that fit the current grid; available recipes can place their ingredients in the grid. Oak, spruce, and birch logs craft their matching planks; recipes that call for planks accept mixed wood types, including the additional plank variants in the block catalog. Creative mode includes the full available item catalog in searchable categories. Some catalog items are currently available only in creative mode.
+
+This update adds 100 texture-backed blocks on top of the previous catalog. It also adds lava buckets; hoes that till soil; seed planting and growing wheat; growing oak saplings; beds that set a respawn point and skip the night; opening doors; climbable ladders; shields; four pieces of equippable iron armor; and basic villager trading. Overworld lava generates in deep caves. Water and lava have distinct source and flowing states, spread downward and sideways, and reroute when blocks change. Water advances about every 0.25 seconds, while lava advances more slowly. Flow chooses the closest reachable drop when one is nearby and spreads in multiple directions on flat ground. Fluid surfaces update immediately without height interpolation. Flowing water pushes the player in its current, and waterfalls pull downward. Lava flows more slowly and has a shorter horizontal reach in the Overworld. Caves retain a thicker roof below nearby land, and ore chances vary by height: diamond and redstone favor deep layers, copper and lapis favor middle layers, and coal favors higher layers. The sky shifts through dawn, daytime, sunset, and night colors.
+
+Animals now wander, follow held wheat, breed when fed, and flee after being hurt. Shears collect 1–3 wool from adult sheep; sheep regrow it after grazing. Villagers flee nearby monsters. Hostile mobs acquire targets only through a clear sight line and navigate around blocks. Skeletons fire physical arrows, blazes and ghasts launch fireballs, witches throw poison potions, and shulkers fire homing levitation bullets. Creepers hiss before exploding and defuse if the player retreats. Zombies and skeletons burn in open sunlight, while spiders become neutral in daylight unless provoked. Endermen turn toward a player who looks at their face, become hostile after a short stare, dodge arrows, and teleport to dry spaces after a hit or when exposed to rain or water. Piglins attack players without golden headgear and when nearby chests or gold blocks are disturbed; they barter when given gold ingots. Snowy trees plant their trunks into the thin snow layer so they meet the ground. Mobs and dropped items now fall, collide with blocks, and move in currents; punches impart a short knockback. Unsupported sand and gravel fall as moving blocks, while generated caves retain a thick roof below sand.
+
+New world chooses a fresh random signed 32-bit seed when the seed box is blank. Entered text is hashed to a signed 32-bit seed; numeric seeds are normalized to the same format. New world clears the old inventory, world edits, chests, dimensions, dragon progress, respawn point, and player state before loading the new world.
+
+Enter `testworld` in the New World seed box for a repeatable flat test range with a water basin and drain, a contained lava basin, a lever and redstone wire line powering a lamp, a rail loop with powered rails and levers, a stocked chest, workstations, and a Nether portal. Typing in the seed box does not trigger game shortcuts. The circuit uses 0–15 wire power and connected powered rails can carry power for up to eight segments. Snow layers have one to eight visible layers; their collision surface is one layer lower than their outline. A single layer can be walked through. Unsupported snow disappears, and nearby torches, lava, fire, or glowstone melt snow.
+
+Rails follow connected tracks. Straight 3D rail models align their metal rails with east–west or north–south track. Corners have raised curved metal rails and angled wood sleepers, with the resource pack's curved rail texture beneath them. The same directions are used by cart movement and the simpler distant straight rail mesh.
+
+Minecarts now continue past the end of a rail with their remaining momentum, then fall under gravity. An overhanging cart can remain supported by the last block until it moves clear of it. Off-rail carts collide with terrain, slow on the ground, and can settle onto a lower rail without jumping sideways to its center. Removing a rail also transfers its cart to physical motion; removing the support beneath lets it fall. A rider follows the cart during the fall.
+
+The block, item, and mob textures came from the supplied Bare Bones 1.21.11 resource pack. Entity geometry and UV offsets now come from the supplied Template CEM archive. Each cuboid wraps the corresponding region of its full entity skin, including head, body, limb, and wool layers. The CEM PNGs are color coded UV guides; the Bare Bones skins provide the visible pixels. The block atlas and entity skins are embedded in `game.bundle.js` for local play. Keep the `textures/icons` and `textures/gui` folders with the game for inventory icons. The portal frame, crops, snow, farmland, bed, door, ladder, torch, chest, cactus, and portals use shaped models and matching hover outlines. Thin blocks sample the corresponding part of their texture. Nether generation includes a roof, lava sea, basalt deltas, soul sand valleys, warped and crimson forests, fungi, roots, vines, pillars, and ore veins.
+
+Entity poses and state changes are adapted from the supplied FreshAnimations v1.10.5 pack for the CEM mob parts. Its OptiFine expression files are not executed directly. The FPS counter uses actual frame elapsed time; chunk generation and mesh rebuilding are budgeted across frames. Items retain their own icons instead of inheriting a stone fallback. Mobs collide with the player, and attacks and projectiles impart directional knockback. New terrain retains large caverns while making narrow tunnels and flooded cave regions less common.
+
+The supplied 3D Default pack provides detailed geometry and UV layouts for chests, portal frames, torches, ladders, doors, rails, farmland, cactus, redstone wire, enchanting tables, brewing stands, anvils, levers, stonecutters, azaleas, bee nests, and flowers. The chest uses the pack's CEM assembly with the supplied Bare Bones chest skin. Shaped blocks without a corresponding model in that archive retain their existing custom geometry. Detailed models render nearby; simpler shapes are used at distance to limit frame spikes.
+
+The playable page loads `game.bundle.js`. The Downloads folder contains only files needed to run the game and this guide; editable source is retained in the development workspace.
+
+Mob rules were checked against Minecraft's [mob overview](https://www.minecraft.net/en-us/article/minecraft-mobs), [first-night guide](https://www.minecraft.net/en-us/article/how-survive-your-first-night-minecraft), [Enderman reference](https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/software/Minecraft-Monstrous-Compendium-revised.pdf), [piglin guide](https://www.minecraft.net/sv-se/article/meet-piglins), and [wool guide](https://www.minecraft.net/pt-pt/article/block-week-wool). The behavior is adapted for this smaller browser world; detailed vanilla targeting, combat statistics, and every mob variant are not fully replicated.
+
+This is a compact Minecraft-inspired game. The dragon, villages, mob behavior, recipes, fluid flow, and lighting are simplified for real-time browser play. It is not affiliated with Mojang or Microsoft.
+
+Floor edits rebuild affected sections immediately; changed lighting is updated in bounded steps. Autosaves use asynchronous browser storage during play. Flowers retain the same daisy texture in their detailed and distant models.
+
+Multiplayer includes the approved Metered client TURN credential for cross-network relay (UDP, TCP, and TLS). The account currently has a free trial allowance; connections requiring relay stop when its quota is exhausted. These client credentials are intentionally public in the uploaded browser build; no account administration API key is included.
