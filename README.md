@@ -1,16 +1,42 @@
 # Voxel Frontier
 
-Version 0.16.3. Includes the modular engine and shared actor systems from 0.15.0, plus resource packs, first-person held items and drawing bows, animated chests, safer spawning and dimension respawning, suffocation, End population and portal rendering repairs.
+Version 0.16.21. Includes the modular engine and shared actor systems from 0.15.0, plus resource packs, first-person held items and drawing bows, animated chests, safer spawning and dimension respawning, suffocation, End population and portal rendering repairs.
 
-## Resource packs
+## Predictive chunk streaming
 
-Open the pause menu, expand **Resource pack**, and choose a Minecraft Java resource pack ZIP. The pack is saved in this browser and restored on reload. **Reset pack** returns to the bundled assets. A pack changes appearance, not the available block/entity catalog or game rules. Packs are selected locally by each multiplayer participant.
+Version 0.16.21 prioritizes generation and meshing from actual movement, prefetches a six-second corridor (including strafing/backwards movement), and increases bounded loading budgets when nearby terrain is incomplete. Movement remains unrestricted.
 
-Supported: `pack.mcmeta`, namespaced texture paths, inherited JSON block/item models, blockstates and multipart selectors, element UVs and rotations, vertical animated block texture sheets, GUI sheets, player skins, sound replacements, and CEM/JPM cuboids for the game's existing mobs. CEM animation expressions support basic math, conditions and the exposed actor variables. Custom item first-person transforms are supported. Geometry and inventory icons are rebuilt from the imported models.
+## Defined Minecraft light values
 
-This is partial Java/OptiFine compatibility, not a complete OptiFine implementation. CTM/CIT, custom shaders/skies, random entity variants, fonts, equipment layers and particle definitions are not implemented. Some CEM transform/attachment/expression features are unsupported; UV lock and weighted model randomization can differ. Inventory animations display their first frame; texture interpolation is not implemented. Textures above 128 pixels per atlas tile are downsampled. The importer displays compatibility warnings. Only one resource pack is active at a time.
+Version 0.16.21 centralizes emission values and state rules in light-rules.js. Lit lamps, candles, furnaces, oxidation variants of copper bulbs, waterlogged sea pickles, respawn-anchor charges, sensors and portals use explicit levels. Day/weather sky-light transitions follow the supplied Java Edition tables; midnight sky light is 4 and sealed underground sky light remains 0. Hostile spawning distinguishes block light from sky light, and crops/saplings require light level 9 to grow. Light-state changes update existing meshes without rebuilding them.
 
-Model format references: [Minecraft model documentation](https://docs.minecraftforge.net/en/1.21.x/resources/client/models/) and [OptiFine CEM documentation](https://github.com/sp614x/optifine/blob/master/OptiFineDoc/doc/cem_model.txt). The End portal rendering was adapted from the shaders and textures in the locally installed Java client.
+## Darker zero light
+
+Version 0.16.21 keeps Minecraft’s nonlinear light brightness curve, reducing the added ambient floor from 3.5% to 0.3%. Full light remains unchanged. Held items use the same curve.
+
+## Texture switch and optimization
+
+Version 0.16.21 adds a labeled Bare Bones / Minecraft toggle switch. Native grass sides include the biome-tinted overlay; existing model nets use compatible Minecraft texture paths, including beds, rails and dragon heads. Texture decoding is parallelized. Successful instant lighting edits skip redundant regional recalculation. Browser tests found no unmapped texture keys used by the block model catalog and verified immediate cross-chunk placement/removal and roof changes.
+
+## Instant lighting edits
+
+Version 0.16.21 immediately relaxes affected light cells after a block edit, across chunk boundaries, and uploads lighting to affected existing meshes in the same call. Deferred regional calculations remain for initial/bulk reconciliation. Tested immediate torch placement/removal and opening/closing a sealed roof, including visible mesh light attributes.
+
+## Lighting update
+
+Version 0.16.21 propagates skylight and block light across chunk boundaries, including light removal. Lighting runs independently of pending meshes, uses a bounded frame budget, and updates existing light attributes only in affected sections. Sealed underground rooms receive no daylight or moonlight.
+
+## Textures
+
+The pause menu's **Use Minecraft textures** toggle switches to the supplied Minecraft texture set after reloading. The original textures remain bundled and are restored by switching it off. This preference is local to each browser. Resource pack uploading is no longer offered.
+
+## 0.16.21 repairs
+
+- Render plants and torches at distant LODs instead of omitting them.
+- Preserve the existing models while switching block, item, entity and GUI textures.
+- Prevent atlas aliases from overwriting replacement textures.
+- Separate 0–15 skylight and block light; render darkness and local emission through vertex light attributes, with day changes handled by a shader uniform.
+- Correct skylight above the terrain scan and add native lantern, soul light, end rod and other emissive block values.
 
 ## Visual and gameplay repairs (0.16.0)
 
@@ -155,7 +181,7 @@ Version 0.15.0 adds Minecraft-style hunger, saturation, exhaustion, regeneration
 
 Entity selectors support type (including !type exclusions), distance ranges, name, limit, sort, x/y/z and dx/dy/dz boxes for /tp and /kill. Examples: /tp @e[type=minecraft:zombie,distance=..30] ~ ~ ~; /kill @e[type=minecraft:item]. Spawn eggs are in the creative inventory's Spawn eggs tab. Testworld's display mobs have noAI enabled and do not despawn with distance. The entity registry provides model, texture, health, speed, drops, onSpawn, onTick, onIdle, onDamage, and onInteract hooks; the item registry provides definition and onUse hooks. Existing Minecraft behavior routines are retained as shared systems.
 
-## Repairs in 0.16.3
+## Repairs in 0.16.8
 
 Corrected chest lid/interior, hopper, daylight detector, bed side and ceiling blossom rendering. Resource pack buttons use readable colors. Dynamic portals replaces the Experiments label. Fifteen animated atlas tiles use animation sheets from the supplied pack or installed Java assets. Lava ignites the player, with a fire overlay and extinguishing in water/rain.
 
@@ -163,9 +189,87 @@ Big dripleaves tilt under players and projectile hits, recover, and remain stabl
 
 Defeating the dragon creates a bedrock-framed End gateway. An ender pearl through it creates a linked gateway on the outer islands; entering the gateway block also transports the player. Destinations are saved and shared with the world. This implements the playable gateway path, not every detail of Java gateway generation, beam timing or entity transport. References: [End cities and gateways](https://www.minecraft.net/zh-hans/article/end-city), [dripleaf and spore blossom behavior](https://www.minecraft.net/pt-br/article/caves---cliffs--part-i-out-today-java).
 
-### 0.16.3 runtime review
+### 0.16.8 runtime review
 
 Fixed negative-coordinate chunk edge lighting and bed metadata cleared by batch placement. Paused single-player worlds now stop primed TNT and dripleaf simulation; multiplayer keeps running. Removed repeated native model resolution, per-frame held-camera projection updates and animated atlas mipmap generation. Failed sound loads terminate without recursive replay, and stale audio loads cannot overwrite a newly selected sound. Removed stale dripleaf state when its block is broken.
 
 Verified with targeted audio, chunk-boundary and bed regressions, the shared actor/commands/network snapshot/instant model/fluid tests, and a browser smoke check covering paused TNT, native block models, animated atlas configuration and gateway creation. This is a focused runtime review, not a claim of complete Minecraft parity or a measured hardware FPS improvement.
+
+### Nature catalog and responsiveness
+
+Added 30 Minecraft plant items using native Java model geometry and Bare Bones textures: 14 small flowers, four tall flowers, tall grass, ferns, mushrooms, dry grasses, bushes, lily pads and cactus flowers. Tall plants place both halves together and are removed when their support is destroyed. Plants use appropriate soil, sand, water or cactus supports; grasses and ferns receive biome tint. New Overworld chunks generate biome-selected vegetation. Existing explored chunks are preserved. Nature items appear in the creative catalog and the test world's item chests/model gallery. This does not implement every plant-specific Minecraft growth, light or drop rule.
+
+Block edits now hide old geometry and show exposed/replacement surfaces immediately, while section rebuilds remain budgeted. Inventory refreshes coalesce, icon images are decoded once, unchanged hotbar DOM is retained, and background rendering is reduced while the inventory is open. Browser regressions passed for all 36 plant block models/icons, tall-plant placement/support removal, immediate floor breaking and placement, temporary mesh cleanup, and coalesced inventory refreshes.
+
+References: [Minecraft grass](https://www.minecraft.net/en-us/article/taking-inventory--grass), [Minecraft ferns](https://www.minecraft.net/pl-pl/article/fern), [Minecraft lily pads](https://www.minecraft.net/de-de/article/taking-inventory--lily-pad). Native geometry was read from the installed Java 1.21.10 assets.
+
+### 0.16.8 environmental damage and textures
+
+Cactus contact deals one health point through the normal damage/armor cooldown. Lava removes ordinary dropped items; netherite items survive. Rebuilt bed face crops for all 16 dye colors, corrected side orientation, and regenerated the registered bed/chest inventory icons. Bed item models include both complete halves; placement refreshes both halves after their state is recorded. Chest face crops now come directly from the uploaded Bare Bones pack, with the lid using the external top. Block materials display existing per-face grid lighting without a second Lambert lighting pass.
+
+Verified cactus contact boundaries, lava drop removal and netherite survival, registered bed geometry/face availability/distinct colored icons, native plant models, instantaneous floor edits, inventory refresh coalescing and temporary mesh cleanup. Reference: [Netherite fire resistance](https://www.minecraft.net/en-us/article/taking-inventory--netherite-ingot).
+
+### 0.16.8 inventory and startup
+
+Initial page startup prepares terrain without showing a loading overlay; creating/joining worlds retains progress screens. Inventory hover names use an immediate visible tooltip. Q drops one hovered inventory item (or the selected hotbar item during gameplay); Ctrl+Q drops the stack. Dragging a stack outside the inventory drops it, and clicking outside with a cursor stack drops it. Restored the requested chest lid/interior texture arrangement. Block icon rendering no longer depends on Lambert lights; rebuilt every registered block icon from the current atlas and model.
+
+### 0.16.8 runtime icons, vegetation and navigation
+
+Block icons now render on demand from current model geometry and the active atlas, cache their result, and invalidate when a resource pack changes. A bounded queue avoids rendering the whole catalog in a single interaction. Enter World shows a progress screen and waits for terrain/effect readiness; initial page startup remains unobstructed. Flipped the bed mattress side tiles vertically.
+
+Vegetation uses configured/placed feature data from installed Java 1.21.10: short-grass patches use 32 attempts, tall grass 96, ordinary flowers 64, horizontal spread 7 and vertical spread 3. Biome patch counts and rarity filters are retained, including rare tall-grass patches in plains/meadows. Neighboring patch origins are evaluated consistently across chunk boundaries. Default flower weights favor poppies 2:1 over dandelions; forest tall flowers and meadow flower regions use separate selections. This implements those rules on Voxel Frontier's terrain/biomes; Minecraft's exact noise/biome maps and every vegetation feature are not ported.
+
+Navigation uses A* travel distance plus Java PathType penalties: water and nearby hazards 8, direct fire 16, lava/cactus/blocked/powder-snow nodes rejected by default, with per-entity overrides. Includes diagonal neighbors, obstacle corner checks and entity headroom. Searches are bounded to keep frame times predictable. Passive damage initializes panic, remembers the damage origin and selects a reachable escape route, then follows it at increased speed; the shared path search steers both pursuit and panic. Minecraft's complete goal scheduler and every species-specific navigation evaluator are not ported.
+
+References: [official vegetation patch changes](https://feedback.minecraft.net/hc/en-us/articles/32412964700813-Minecraft-Beta-Preview-1-21-60-23), [official panic behavior](https://learn.microsoft.com/en-us/minecraft/creator/reference/content/entityreference/examples/entitygoals/minecraftbehavior_panic?view=minecraft-bedrock-stable). Java defaults and patch settings were verified against local game assets and PathType bytecode.
+
+### 0.16.8
+- Flint and steel ignites supported block surfaces and mobs, retains portal/TNT ignition, and syncs mob ignition through multiplayer. Burning mobs display flames and take damage.
+- Removed action notifications at the top; chat output remains available.
+- Fixed short-grass textures and azalea models/selection outlines across detail levels, brightened block shading, added a textured sleep overlay, and enabled stepping onto slabs/stairs.
+- Verified short-grass texture, azalea detail/outline consistency, slab stepping, and mob ignition/flames/damage in a browser with no page errors.
+
+
+### 0.16.9
+- Fixed missing atlas aliases for short grass and azalea textures; restored green biome tint.
+- Directional structure blocks rotate to player facing when placed.
+- Flower patches are three times rarer; grass patches twice as rare, with 60% fewer placement attempts. Existing vegetation remains in saved chunks.
+
+### 0.16.10 loading and block updates
+- Higher terrain/mesh budgets during loading; buried full cubes skip model resolution; cached lighting occlusion checks; nearest chunks mesh first.
+- Preloads two additional chunk rings and prioritizes the player's facing direction. Movement is not blocked at unloaded boundaries.
+- Restored detailed alpha-cutout oak, spruce, birch and flowering azalea leaf textures from the installed Minecraft 1.21.10 assets.
+- Added a reusable due-tick/priority/insertion-ordered, deduplicated update scheduler and migrated delayed lava updates to it. Existing immediate neighbor notifications and deduplicated water/gravity queues remain; this is not a complete replacement of Minecraft's simulation engine.
+- Research: https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_tick and Minecraft Java LevelTicks/ScheduledTick mappings.
+- Verified scheduler ordering/delays/deduplication/budget, leaf alpha variation and browser regressions. Loading-only benchmark: 26.2s before / 21.9s after, Edge software WebGL; hardware timings differ.
+
+
+### 0.16.11 inventory icons and scheduled updates
+- Fire/cross-model icons resolve the block texture instead of defaulting to grass. Generated icons apply plant, leaf, water and redstone colors.
+- Gravity checks now share the ordered scheduled-update queue with bounded processing and duplicate suppression, separately per dimension. Lava uses delayed scheduled checks.
+- Same-state non-fluid block writes return without lighting/mesh/neighbor work; batch fluid cache invalidation runs once rather than per block.
+- Browser checks passed for fire-icon UVs, green leaf icon colors, grass/azalea models, stepping and mob ignition. Scheduled queue tests passed. With the prefetch changes, nearby terrain prepared in 13.7 seconds in the same software-WebGL test (26.2 seconds baseline).
+
+### 0.16.12 hotbar and leaves
+- Fixed hotbar rendering exceptions for items without a color field; validated all nine slots with short grass selected.
+- Generated model icons use face tint metadata and texture names, including plant/leaf colors, while leaving azalea wood untinted.
+- Applied all nine leaf textures from Barebones Leaves Add-on. Leaf holes use alpha-test cutouts and opaque depth-writing pixels; preserved internal leaf faces across LODs.
+- Research: https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_material_instances .
+- Browser checks passed for hotbar, icon UVs/tint, grass/azalea models, stepping, scheduled gravity and burning mobs.
+
+
+### 0.16.13 leaves, sprinting and settings
+- Leaves without an adjacent air block use opaque variants; exposed leaves retain cutout transparency. Neighbor edits refresh this selection.
+- Fleeing mobs run at 2.5 times normal movement speed by default; leg cycle speed follows fleeing speed with a wider sprint stride.
+- Render distance supports 2â€“32 chunks, with an inline warning above 16.
+- Consolidated grass block inventory entries and migrated saved inventory/chest stacks to the canonical grass block ID. Existing placed blocks remain compatible.
+- Browser checks passed for enclosed/exposed/restored leaf UVs, slider limits/warning threshold, one grass item, hotbar, scheduled gravity and earlier regressions.
+
+
+### 0.16.14 optimized light grid and faster fleeing
+- Separate cached 0â€“15 sky-light and block-light arrays. Torch emission is 14, normal propagation loses one level, leaves attenuate sky light by one and water by two.
+- Chunk vertices carry two light channels. Day/night adjusts a shader uniform, eliminating global day/night relighting and geometry rebuilds. Lighting edits rebuild only sections with changed light channels.
+- Source: https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_light_emission and light_dampening.
+- Fleeing animals default to 3.5 times normal speed, with matching animation cadence.
+- Verified light levels, falloff, torch illumination at night, compiled grid shader/vertex attributes, and the previous browser regression checks without shader errors.
 
