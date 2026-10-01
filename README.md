@@ -1,6 +1,40 @@
 # Voxel Frontier
 
-Version 0.14.8.
+Version 0.16.3. Includes the modular engine and shared actor systems from 0.15.0, plus resource packs, first-person held items and drawing bows, animated chests, safer spawning and dimension respawning, suffocation, End population and portal rendering repairs.
+
+## Resource packs
+
+Open the pause menu, expand **Resource pack**, and choose a Minecraft Java resource pack ZIP. The pack is saved in this browser and restored on reload. **Reset pack** returns to the bundled assets. A pack changes appearance, not the available block/entity catalog or game rules. Packs are selected locally by each multiplayer participant.
+
+Supported: `pack.mcmeta`, namespaced texture paths, inherited JSON block/item models, blockstates and multipart selectors, element UVs and rotations, vertical animated block texture sheets, GUI sheets, player skins, sound replacements, and CEM/JPM cuboids for the game's existing mobs. CEM animation expressions support basic math, conditions and the exposed actor variables. Custom item first-person transforms are supported. Geometry and inventory icons are rebuilt from the imported models.
+
+This is partial Java/OptiFine compatibility, not a complete OptiFine implementation. CTM/CIT, custom shaders/skies, random entity variants, fonts, equipment layers and particle definitions are not implemented. Some CEM transform/attachment/expression features are unsupported; UV lock and weighted model randomization can differ. Inventory animations display their first frame; texture interpolation is not implemented. Textures above 128 pixels per atlas tile are downsampled. The importer displays compatibility warnings. Only one resource pack is active at a time.
+
+Model format references: [Minecraft model documentation](https://docs.minecraftforge.net/en/1.21.x/resources/client/models/) and [OptiFine CEM documentation](https://github.com/sp614x/optifine/blob/master/OptiFineDoc/doc/cem_model.txt). The End portal rendering was adapted from the shaders and textures in the locally installed Java client.
+
+## Visual and gameplay repairs (0.16.0)
+
+- Held blocks/items use their models or transparent sprites; bows show drawing stages. Remote players show their selected item.
+- Fixed azalea textures, head side UVs, zero-thickness dragon wing faces, and block-icon scaling.
+- Chests animate their lid and latch without rebuilding chunks. Multiplayer chest viewer state and machine metadata are synchronized.
+- End arrival initializes about 40 endermen. The exit uses a layered End portal surface rather than the experimental see-through effect.
+- Void death returns to a safe Overworld spawn, with survival values reset. Spawn selection checks player collision. Full opaque blocks suffocate players and ordinary mobs; partial blocks do not.
+- Creative can mine unbreakable blocks. Command results appear in local chat; public chat commands retain their broadcast behavior.
+- Multiplayer entity snapshots include motion/animation and appearance state. Rendering remains interpolated, and networking remains subject to latency; this is not a guarantee of complete Minecraft multiplayer parity.
+
+## Instant models, beds and chest loot (0.15.0)
+
+Doors and levers update their existing vertex/normal/UV ranges immediately, rather than rebuilding or relighting a chunk. Door halves and multiplayer state changes share this path. Queued section builds sample the current state again before committing, and unchanged network power snapshots no longer trigger repeated remeshing.
+
+Beds use separate head/foot nets from the supplied Bare Bones texture and the installed BedRenderer mattress/leg dimensions and UV offsets. Placement creates both halves, records facing, requires support under both halves, and breaking either half removes the partner. Existing template beds retain their original half/facing properties.
+
+The [loot table viewer](https://www.minecraftmaps.com/tools/loot-tables) was checked for pool, roll, weight and function structure. The 56 Java 1.21.10 chest tables are bundled from the installed Minecraft client. Village houses, strongholds, dungeons, Nether fortresses, bastions and End cities use their corresponding pools; template block-entity loot references take priority. Contents roll once, use deterministic per-chest randomness, preserve collected/opened chest contents and distribute stacks among random slots. Player-placed chests stay empty. Unknown items are omitted without being replaced by unrelated items or redistributing their selection weight. Advanced loot functions not supported by the game's item system are retained as metadata, rather than claiming full vanilla enchantment/map functionality.
+
+Verification: 40 lever/door orientation and state pairs; 100 toggles reuse the same buffers without queuing a remesh; all 56 loot tables tested with 20 seeds each; bed half/facing geometry and atlas references; syntax and portable build checks. This pass did not include an interactive gameplay performance measurement.
+
+## Fountain, door-variant and torch corrections
+
+Template water preserves Minecraft source/flow/falling levels. Downward flow takes priority over horizontal spread, with the vanilla three-source-neighbor exception. Plains and desert fountain fixtures remain contained after 240 flow ticks; vertical falls, four-way seven-block spread and source-removal drainage pass. Imported jungle door variants now share door interaction, paired placement/removal, collision, redstone and instant model updates. Floor/wall and redstone lit/unlit models use the installed Minecraft geometry and existing pack textures. Redstone torches strongly power the block above instead of all adjacent blocks, and count off-switches for burnout. Cross-checks: the installed FlowingFluid bytecode, [Minecraft's door behavior](https://www.minecraft.net/en-us/article/taking-inventory--door) and [Microsoft's redstone guide](https://learn.microsoft.com/en-us/minecraft/creator/documents/redstoneguide).
 
 ## Combat and mob portal travel
 
@@ -115,3 +149,23 @@ Floor edits rebuild affected sections immediately; changed lighting is updated i
 Multiplayer includes the approved Metered client TURN credential for cross-network relay (UDP, TCP, and TLS). The account currently has a free trial allowance; connections requiring relay stop when its quota is exhausted. These client credentials are intentionally public in the uploaded browser build; no account administration API key is included.
 
 Version 0.14.3 fixes the relay configuration being omitted from PeerJS options, accepts capitalized room codes, reconnects signaling after interruptions, and loads versioned scripts to avoid stale mobile caches. Relay tests assert actual selected local and remote TURN candidates. Refresh both devices and create a new host room after updating.
+
+Version 0.15.0 adds Minecraft-style hunger, saturation, exhaustion, regeneration and starvation; chat and multiplayer commands (`/say`, `/msg`, `/tell`, `/w`, `/me`, `/list`); multiplayer syncing for redstone-powered block states and End crystal destruction; an End-return loading screen; faster chunk generation; and a loading-screen version label. New water updates are applied together per flow tick to keep simultaneous branches stable.
+
+
+Entity selectors support type (including !type exclusions), distance ranges, name, limit, sort, x/y/z and dx/dy/dz boxes for /tp and /kill. Examples: /tp @e[type=minecraft:zombie,distance=..30] ~ ~ ~; /kill @e[type=minecraft:item]. Spawn eggs are in the creative inventory's Spawn eggs tab. Testworld's display mobs have noAI enabled and do not despawn with distance. The entity registry provides model, texture, health, speed, drops, onSpawn, onTick, onIdle, onDamage, and onInteract hooks; the item registry provides definition and onUse hooks. Existing Minecraft behavior routines are retained as shared systems.
+
+## Repairs in 0.16.3
+
+Corrected chest lid/interior, hopper, daylight detector, bed side and ceiling blossom rendering. Resource pack buttons use readable colors. Dynamic portals replaces the Experiments label. Fifteen animated atlas tiles use animation sheets from the supplied pack or installed Java assets. Lava ignites the player, with a fire overlay and extinguishing in water/rain.
+
+Big dripleaves tilt under players and projectile hits, recover, and remain stable when powered. Bone meal grows dripleaves. Beds use one canonical item per existing color, place both halves, allow Overworld sleeping and respawn setting, and explode when used in the Nether/End. Water buckets evaporate in the Nether. Primed TNT remains visible during its fuse. Bow release also handles pointer release/cancellation; the browser context menu no longer interrupts charging. Dragon damage tests individual model parts; head hits retain full damage, and other parts take reduced damage. Perch/takeoff includes a watchdog for stalled flight.
+
+Defeating the dragon creates a bedrock-framed End gateway. An ender pearl through it creates a linked gateway on the outer islands; entering the gateway block also transports the player. Destinations are saved and shared with the world. This implements the playable gateway path, not every detail of Java gateway generation, beam timing or entity transport. References: [End cities and gateways](https://www.minecraft.net/zh-hans/article/end-city), [dripleaf and spore blossom behavior](https://www.minecraft.net/pt-br/article/caves---cliffs--part-i-out-today-java).
+
+### 0.16.3 runtime review
+
+Fixed negative-coordinate chunk edge lighting and bed metadata cleared by batch placement. Paused single-player worlds now stop primed TNT and dripleaf simulation; multiplayer keeps running. Removed repeated native model resolution, per-frame held-camera projection updates and animated atlas mipmap generation. Failed sound loads terminate without recursive replay, and stale audio loads cannot overwrite a newly selected sound. Removed stale dripleaf state when its block is broken.
+
+Verified with targeted audio, chunk-boundary and bed regressions, the shared actor/commands/network snapshot/instant model/fluid tests, and a browser smoke check covering paused TNT, native block models, animated atlas configuration and gateway creation. This is a focused runtime review, not a claim of complete Minecraft parity or a measured hardware FPS improvement.
+
