@@ -134,3 +134,8 @@ Full audit remains in progress; these are bounded observations, not blanket feat
 - Creative water-bucket retake: water appeared in Overworld and existing empty-bucket count remained 1, without adding another bucket.
 - Flint and steel ignited a TNT fixture: primed TNT remained visible before explosion, then a crater appeared. Flint and steel also placed visible fire on grass.
 - Audit stopped at the user's release request. Remaining unchecked feature combinations are not certified.
+
+## Targeted fixes — 7 October
+- Witch hat tiers centered and attached to head; spawned witch inspected in game.
+- Creeper detonated beside a torch inside an obsidian room. Returning to the intact room showed light 0 and darkness after the torch was destroyed.
+- Initial pointer-lock request now runs during the entry click before asynchronous preparation. Failure-only lock events no longer pause the game. Native lock permission cannot be certified by the in-app browser.
