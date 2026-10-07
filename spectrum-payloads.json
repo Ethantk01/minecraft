@@ -1,0 +1,14 @@
+{
+  "name": "Spectrum Library",
+  "payloads": [
+    {
+      "name": "Spectrum Library",
+      "filename": "SpectrumLibrary_1.4.8.elf",
+      "url": "https://github.com/Phoenixx1202/Spectrum-Library/releases/download/1.4.8/SpectrumLibrary_1.4.8.elf",
+      "description": "Spectrum Library 1.4.8 for PS5",
+      "version": "1.4.8",
+      "category": "Homebrew",
+      "checksum": "5d1372d48f76167e3f9e24b335cf571ea6e4b3960e6b7202d2802b0f78c3a519"
+    }
+  ]
+}
